@@ -1,20 +1,22 @@
 import express from 'express'
-import connectdb from './database.js'
-import baseroutes from './routes/index.js'
-import urlroutes from './routes/url.js'
-import cors from 'cors'
+import Url from '../models/url.js'
 
-const app = express()
-connectdb()
-app.use(cors())
-app.use(express.json({
-    extended: false
-}))
+const router = express.Router()
 
-app.get('/',(req,res) =>  res.send('this is the api'));
+router.get('/:code', async(req, res)=>{
+    try {
+        const url = await Url.findOne({urlcode: req.params.code})
+        if (url){
+            return res.redirect(url.longurl)
+            
+        }
+        else {
+            return res.status(404).json('404 - Not Found >:<')
+        }
+    } catch (e) {
+        console.log(e)
+        res.status(404).json('404 - Not Found >:<')
+    }
+})
 
-
-app.use('/', baseroutes)
-app.use('/api/url/', urlroutes)
-const PORT = process.env.PORT||5000
-app.listen(PORT,()=>console.log(`if you see this, you are a legend. PORT NUMBER ${PORT}.`))
+export default router
